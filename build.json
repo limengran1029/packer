@@ -1,0 +1,67 @@
+{
+    "variables": {
+        "hostname": "ubuntu",
+        "domain": "local",
+        "ssh_user": "meli",
+        "ssh_pass": "1234"
+    },
+    "builders": 
+    [
+        {
+        "type": "qemu",
+        "name": "{{user `hostname`}}",
+        "vm_name": "{{user `hostname`}}",
+        "iso_url": "http://cdimage.ubuntu.com/releases/18.04/release/ubuntu-18.04.3-server-amd64.iso",
+        "iso_checksum": "cb7cd5a0c94899a04a536441c8b6d2bf",
+        "iso_checksum_type": "md5",
+        "output_directory": "output_{{ timestamp }}",
+        "disk_size": "20000",
+        "format": "qcow2",
+        "headless": "false",
+        "http_directory": "http",
+        "ssh_username": "{{user `ssh_user`}}",
+        "ssh_password": "{{user `ssh_pass`}}",
+        "net_device": "virtio-net",
+        "disk_interface": "virtio",
+        "ssh_wait_timeout": "20m",
+        "shutdown_command": "echo -e '{{user `ssh_pass`}}' | sudo -S /sbin/halt -p",
+        "boot_command": [
+            "<enter><wait><f6><esc><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+            "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+            "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+            "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+            "/install/vmlinuz<wait>",
+            " auto<wait>",
+            " console-setup/ask_detect=false<wait>",
+            " console-setup/layoutcode=us<wait>",
+            " console-setup/modelcode=pc105<wait>",
+            " debconf/frontend=noninteractive<wait>",
+            " debian-installer=en_US<wait>",
+            " fb=false<wait>",
+            " initrd=/install/initrd.gz<wait>",
+            " kbd-chooser/method=us<wait>",
+            " keyboard-configuration/layout=USA<wait>",
+            " keyboard-configuration/variant=USA<wait>",
+            " locale=en_US<wait>",
+            " netcfg/get_domain={{user `domain`}}<wait>",
+            " netcfg/get_hostname={{user `hostname`}}<wait>",
+            " grub-installer/bootdev=/dev/vda<wait>",
+            " noapic<wait>",
+            " preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg",
+            " -- <wait>",
+            "<enter><wait>"
+        ]
+     }
+    ],
+    "provisioners": [{
+        "type": "file",
+        "source": "files/authorized_keys",
+        "destination": "/tmp/authorized_keys"
+    },
+    {
+        "type": "shell",
+        "execute_command": "echo 'meli' | sudo -S bash '{{.Path}}'",
+        "start_retry_timeout": "1m",
+        "script": "scripts/init.ssh"
+    }]
+}

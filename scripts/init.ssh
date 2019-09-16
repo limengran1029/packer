@@ -1,0 +1,6 @@
+#!/bin/bash
+
+mkdir -p /home/meli/.ssh
+cp /tmp/authorized_keys /home/meli/.ssh/authorized_keys
+chown -R meli:meli /home/meli/.ssh
+chmod -R 0700 /home/meli/.ssh
